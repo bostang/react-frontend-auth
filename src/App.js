@@ -58,7 +58,7 @@ const App = () => {
     };
 
     checkLoginStatus();
-  }, [token]); // Re-run when token changes
+  }, [token, USERS_ME_URL]); // Re-run when token changes
 
   // Handle Register Form Submission
   const handleRegister = async (e) => {
