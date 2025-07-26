@@ -36,3 +36,8 @@ COPY --from=build-stage /app/build /usr/share/nginx/html
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+
+# Catatan:
+# Untuk membangun dan mendorong image Nginx dengan konfigurasi ini, gunakan perintah berikut:
+# docker build -t bostang/auth-app-frontend:latest -f react-frontend-auth/Dockerfile .
+# docker push bostang/auth-app-frontend:latest

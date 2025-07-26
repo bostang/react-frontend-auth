@@ -63,5 +63,3 @@ npm install --save-dev react-scripts@latest
 
 npm test -- --watchAll=false
 ```
-
-

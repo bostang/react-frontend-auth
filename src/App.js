@@ -12,14 +12,19 @@ const App = () => {
   const [token, setToken] = useState(localStorage.getItem('access_token') || ''); // Load token from localStorage
   const [currentUser, setCurrentUser] = useState(null);
 
-  const API_BASE_URL = 'http://127.0.0.1:8000/api/auth'; // Sesuaikan jika backend Anda berjalan di port/host lain
-  const USERS_ME_URL = 'http://127.0.0.1:8000/api/users/me'; // Endpoint untuk mendapatkan data pengguna
+  // --- PERUBAHAN DIMULAI DI SINI ---
+  // Gunakan path relatif karena Nginx di frontend akan mem-proxy '/api' ke backend
+  const API_BASE_PATH = '/api'; // Base path for all API calls, handled by Nginx proxy
+  const API_AUTH_URL = `${API_BASE_PATH}/auth`; // Untuk endpoint /api/auth/register dan /api/auth/login
+  const USERS_ME_URL = `${API_BASE_PATH}/users/me`; // Untuk endpoint /api/users/me
+  // --- PERUBAHAN BERAKHIR DI SINI ---
 
   // Effect to check login status and fetch user data on component mount or token change
   useEffect(() => {
     const checkLoginStatus = async () => {
       if (token) {
         try {
+          // Menggunakan USERS_ME_URL yang sudah diperbarui
           const response = await fetch(USERS_ME_URL, {
             method: 'GET',
             headers: {
@@ -34,7 +39,6 @@ const App = () => {
             setIsLoggedIn(true);
             setMessage('Berhasil login!');
           } else {
-            // Token might be expired or invalid
             console.error('Failed to fetch user data:', response.statusText);
             setMessage('Sesi tidak valid atau kedaluwarsa. Silakan login kembali.');
             setIsLoggedIn(false);
@@ -61,7 +65,8 @@ const App = () => {
     e.preventDefault();
     setMessage('Mendaftarkan...');
     try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
+      // Menggunakan API_AUTH_URL yang sudah diperbarui
+      const response = await fetch(`${API_AUTH_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,10 +78,10 @@ const App = () => {
 
       if (response.ok) {
         setMessage(`Pendaftaran berhasil untuk ${data.username}! Silakan login.`);
-        setShowRegisterForm(false); // Switch to login form after successful registration
-        setUsername(''); // Clear username field
-        setEmail(''); // Clear email field
-        setPassword(''); // Clear password field
+        setShowRegisterForm(false);
+        setUsername('');
+        setEmail('');
+        setPassword('');
       } else {
         setMessage(`Pendaftaran gagal: ${data.detail || 'Terjadi kesalahan.'}`);
       }
@@ -91,7 +96,8 @@ const App = () => {
     e.preventDefault();
     setMessage('Mencoba login...');
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      // Menggunakan API_AUTH_URL yang sudah diperbarui
+      const response = await fetch(`${API_AUTH_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +109,7 @@ const App = () => {
 
       if (response.ok) {
         setToken(data.access_token);
-        localStorage.setItem('access_token', data.access_token); // Store token
+        localStorage.setItem('access_token', data.access_token);
         setIsLoggedIn(true);
         setMessage('Login berhasil!');
       } else {
@@ -145,7 +151,6 @@ const App = () => {
         )}
 
         {isLoggedIn ? (
-          // Logged In View
           <div className="text-center">
             <p className="lead mb-3">Selamat datang, {currentUser?.username}!</p>
             <p className="text-muted mb-4">Email: {currentUser?.email}</p>
@@ -157,10 +162,8 @@ const App = () => {
             </button>
           </div>
         ) : (
-          // Register or Login Forms
           <>
             {showRegisterForm ? (
-              // Register Form
               <form onSubmit={handleRegister}>
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">
@@ -209,7 +212,6 @@ const App = () => {
                 </button>
               </form>
             ) : (
-              // Login Form
               <form onSubmit={handleLogin}>
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">
@@ -246,12 +248,11 @@ const App = () => {
               </form>
             )}
 
-            {/* Toggle between Login and Register */}
             <div className="mt-4 text-center">
               <button
                 onClick={() => {
                   setShowRegisterForm(!showRegisterForm);
-                  setMessage(''); // Clear message when switching forms
+                  setMessage('');
                   setUsername('');
                   setEmail('');
                   setPassword('');
